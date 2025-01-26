@@ -1,2 +1,2 @@
-# ECON426-Notes_Homework
+# ECON426: Notes and Homework
 Notes and Homework for Econometrics - ECON 426
