@@ -1,0 +1,202 @@
+---
+title: "Econometrics - Lecture 1"
+subtitle: "Introduction to Ordinary Least Squares (OLS)"
+author: "Logan Kelly, Ph.D."
+date: "January 25, 2025"
+---
+
+## Introduction
+
+In this first topic, we explore the intuition behind Ordinary Least Squares (OLS) and the classic assumptions that guarantee OLS is the Best Linear Unbiased Estimator (BLUE) under the Gauss–Markov Theorem. By the end, you should have a clear idea of why we use OLS, the conditions under which its estimates are valid, and the concept of “best” in terms of minimizing variance.
+
+## Key Concepts
+
+- Ordinary Least Squares (OLS): A method to estimate parameters by minimizing the sum of squared residuals.
+- Gauss–Markov Theorem & BLUE: Under certain assumptions, OLS provides the Best Linear Unbiased Estimator.
+- Classic Assumptions: Linearity, random sampling, no perfect collinearity, zero conditional mean of errors, homoscedasticity, and normality (for inference).
+
+## Theoretical Discussion
+
+### Intuition Behind OLS
+
+- Minimizing Squared Errors: OLS chooses $\beta$ to minimize $\sum (y_i - \hat{y}_i)^2$. 
+- Geometrically, it finds the “closest” line (or hyperplane in multiple dimensions) to all observed data points.
+- For example, using the `mtcars` dataset, we can create a 3D scatter plot to visualize the relationship between miles per gallon (mpg) as the dependent variable and weight (wt) and horsepower (hp) as the independent variables.
+
+```{r, echo=FALSE, warning=FALSE, fig.width=4}
+# Load necessary libraries
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+pacman::p_load(plotly, knitr, magick)
+
+# Load the mtcars dataset
+data(mtcars)
+
+# Fit a multiple regression model
+model <- lm(mpg ~ wt + hp, data = mtcars)
+
+# Create a grid of values for wt and hp
+wt_grid <- seq(min(mtcars$wt), max(mtcars$wt), length.out = 30)
+hp_grid <- seq(min(mtcars$hp), max(mtcars$hp), length.out = 30)
+
+# Create a grid of points (combinations of wt and hp)
+grid <- expand.grid(wt = wt_grid, hp = hp_grid)
+
+# Predict mpg for each combination of wt and hp using the model
+grid$mpg <- predict(model, newdata = grid)
+
+# Create the 3D scatter plot
+fig <- plot_ly(mtcars, x = ~wt, y = ~hp, z = ~mpg, type = "scatter3d", mode = "markers", showlegend = FALSE) %>%
+  add_surface(x = ~wt_grid, y = ~hp_grid, z = matrix(grid$mpg, nrow = length(wt_grid)), 
+              showscale = FALSE, opacity = 0.5) %>%
+  layout(scene = list(
+           xaxis = list(title = 'Weight'),
+           yaxis = list(title = 'Horsepower'),
+           zaxis = list(title = 'Miles per Gallon'),
+           camera = list(
+             eye = list(x = 2, y = 2, z = 2)  # Adjust this to zoom out
+           )),
+         showlegend = FALSE,
+         margin = list(l = 0, r = 0, b = 0, t = 0),
+         showlegend = FALSE) %>%
+  config(displayModeBar = FALSE)
+
+# Conditional rendering based on output format
+if (knitr::is_html_output()) {
+  fig  # Render the interactive plot in HTML output
+} else if (knitr::is_latex_output()) {
+  # Save the plotly figure as a larger static image using orca
+  orca(fig, file = "img/3d_plot_large.png", width = 3200, height = 2400)
+  
+  # Load and crop the image using magick
+  image <- image_read("img/3d_plot_large.png")
+  cropped_image <- image_trim(image, fuzz = 0)#?image_crop(image, "1200x900+100+100")  # Adjust crop dimensions as needed
+  
+  # Save the cropped image
+  image_write(cropped_image, path = "img/3d_plot_cropped.png")
+  
+  # Include the cropped image in the PDF output
+  knitr::include_graphics("img/3d_plot_cropped.png")
+  
+}
+```
+
+
+### OLS Assumptions
+
+  1. **Linearity**  
+    - The relationship between the predictors and the dependent variable is linear in parameters.  
+    - Mathematically:
+      $$
+      y = \beta_0 + \beta_1 x_1 + \cdots + \beta_k x_k + \varepsilon
+      $$
+    - Visual checks (scatterplots, residual plots) help verify whether this functional form is appropriate.
+
+  2. **Independence of Errors**  
+    - Residuals for different observations should be uncorrelated.  
+    - In cross-sectional data, this typically follows from random sampling; in time-series data, it implies no autocorrelation.  
+    - Mathematically (for $i \neq j$):
+      $$
+      \mathrm{Cov}(\varepsilon_i, \varepsilon_j) = 0
+      $$
+
+  3. **Homoscedasticity**  
+    - The variance of the residuals is constant at all levels of the independent variables (no systematic pattern of changing variance).  
+    - Mathematically:
+      $$
+      \mathrm{Var}(\varepsilon_i \mid X) = \sigma^2 \quad \forall i
+      $$
+    - Heteroscedasticity (unequal variances) can lead to inefficient estimates and unreliable standard errors.
+
+  4. **Normality of Residuals**  
+    - Residuals are assumed to follow a normal distribution.  
+    - Mathematically (conditional on $X$):
+      $$
+      \varepsilon \sim N(0, \sigma^2 I)
+      $$
+    - This is particularly important for valid hypothesis testing and confidence interval construction.
+
+  5. **Exogeneity of Independent Variables**  
+    - The independent variables must not be correlated with the error term (zero conditional mean).  
+    - Mathematically:
+      $$
+      \mathrm{E}(\varepsilon \mid X) = 0
+      $$
+    - Guarantees unbiased and consistent parameter estimates and underpins causal interpretation.
+
+  6. **No Perfect Multicollinearity**  
+    - In multiple regression, independent variables should not be perfectly correlated.  
+    - Mathematically, for a design matrix $X$:
+      $$
+      \det(X^\top X) \neq 0
+      $$
+    - Perfect collinearity prevents isolating the effect of individual predictors.
+
+  8. **No Specification Bias**  
+    - The model must be correctly specified: it should include relevant variables and exclude irrelevant ones, while having the correct functional form.  
+    - Omitting essential variables or introducing irrelevant ones can cause biased or inconsistent estimates.
+
+- By ensuring these assumptions are met (or at least not severely violated), OLS provides reliable estimates and meaningful interpretations. 
+
+- 
+
+### Derivation of OLS Estimates
+
+To derive the OLS estimates, we start with the linear regression model:
+
+$$
+y = X\beta + \varepsilon
+$$
+
+where:
+- $y$ is an $n \times 1$ vector of observations,
+- $X$ is an $n \times k$ matrix of regressors (including a column of ones for the intercept),
+- $\beta$ is a $k \times 1$ vector of parameters,
+- $\varepsilon$ is an $n \times 1$ vector of error terms.
+
+The OLS method seeks to find $\hat{\beta}$ that minimizes the sum of squared residuals:
+
+$$
+S(\beta) = (y - X\beta)^\top (y - X\beta)
+$$
+
+To find the minimum, take the derivative of $S(\beta)$ with respect to $\beta$ and set it to zero:
+
+$$
+\frac{\partial S(\beta)}{\partial \beta} = -2X^\top (y - X\beta) = 0
+$$
+
+Solving for $\beta$:
+
+$$
+X^\top y - X^\top X \beta = 0
+$$
+
+$$
+X^\top X \beta = X^\top y
+$$
+
+Assuming $X^\top X$ is invertible, the OLS estimator is:
+
+$$
+\hat{\beta} = (X^\top X)^{-1} X^\top y
+$$
+
+This is the formula for the OLS estimates of the parameters $\beta$.
+
+### Why OLS is BLUE
+
+- Best: Among all linear unbiased estimators, OLS has the smallest variance.
+- Linear Unbiased Estimator: It’s linear in the observed $y$-values, and under the assumptions, it correctly estimates the true parameters on average.
+- Gauss–Markov Theorem: This formal theorem states that, provided the assumptions are met, OLS will yield estimates with the lowest variance (i.e., more precise) compared to any other linear unbiased estimator.
+
+## Conclusion
+
+- OLS is a straightforward yet powerful estimation method that minimizes the sum of squared residuals.
+- The classic assumptions must hold for OLS estimates to be unbiased and for OLS to be the best (lowest variance) linear unbiased estimator.
+- Practical checks—like residual plots and verifying model specifications—are crucial to ensure the assumptions are not violated.
+
+## References
+
+- Wooldridge, J. M. (2013). *Introductory Econometrics: A Modern Approach*. Cengage Learning.
+- Stock, J. H., & Watson, M. W. (2019). *Introduction to Econometrics*. Pearson.
+- Angrist, J. D., & Pischke, J. (2009). *Mostly Harmless Econometrics: An Empiricist's Companion*. Princeton University Press.

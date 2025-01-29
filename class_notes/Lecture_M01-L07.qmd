@@ -1,0 +1,131 @@
+---
+title: "Econometrics - Lecture 7"
+subtitle: "Transformations and Non-Linear Models"
+author: "Logan Kelly Ph.D."
+date: "January 28, 2025"
+---
+
+## Introduction
+
+- This lecture explores regression models that use transformations of variables to capture non-linear relationships.
+- Focus areas:
+  - Linear-Log Model
+  - Polynomial Models
+  - Log-Linear Model
+  - Log-Log Model
+- Each approach can improve model fit and interpretability, especially when the relationship between the dependent and independent variables is not purely linear.
+
+## Key Concepts
+
+- Transformations can address:
+  - Curvilinear relationships (polynomial models).
+  - Percentage changes (log transformations).
+  - Diminishing returns or growth patterns (log-log models).
+
+- R-squared considerations:
+  - Standard R-squared is straightforward for models in the original (untransformed) scale.
+  - Models involving logs may use alternative fit measures (e.g., adjusted R-squared or pseudo R-squared) depending on context.
+
+## Linear-Log Model
+
+- Structure:
+  - Dependent variable (Y) is in its original form.
+  - Independent variable (X) is transformed using the natural log.
+  - Model form:  
+    $$
+    Y = \beta_0 + \beta_1 \ln(X) + \epsilon
+    $$
+
+- Interpretation:
+  - $\beta_1$ indicates the change in $Y$ for a 1% change in $X$, holding other factors constant.
+  - Useful when the effect of $X$ on $Y$ is expected to diminish as $X$ grows.
+
+- Example with `mtcars`:
+```{r}
+# Linear-Log example: mpg vs ln(wt)
+data <- mtcars
+model_linlog <- lm(mpg ~ log(wt), data = data)
+summary(model_linlog)
+```
+
+## Polynomial Models
+
+- Structure:
+  - Polynomial terms capture curvature in the relationship.
+  - Common example: quadratic model.  
+    $$
+    Y = \beta_0 + \beta_1 X + \beta_2 X^2 + \epsilon
+    $$
+
+- Interpretation:
+  - $\beta_1$ is the linear term, $\beta_2$ captures curvature.
+  - A positive $\beta_2$ indicates a U-shaped curve, negative indicates an inverted U-shape.
+
+- Example with `mtcars`:
+```{r}
+# Polynomial example: mpg vs wt (including wt^2)
+model_poly <- lm(mpg ~ wt + I(wt^2), data = data)
+summary(model_poly)
+```
+
+## Log-Linear Model
+
+- Structure:
+  - Dependent variable (Y) is transformed using the natural log.
+  - Independent variables remain in original form.
+  - Model form:  
+    $$
+    \ln(Y) = \beta_0 + \beta_1 X + \epsilon
+    $$
+
+- Interpretation:
+  - $\beta_1$ represents the approximate percentage change in $Y$ for a one-unit change in $X$.
+  - Often used when $Y$ grows exponentially, such as with population or monetary variables.
+
+- Example with `mtcars`:
+```{r}
+# Log-Linear example: ln(mpg) vs wt
+model_loglin <- lm(log(mpg) ~ wt, data = data)
+summary(model_loglin)
+```
+
+## Log-Log Model
+
+- Structure:
+  - Both $Y$ and $X$ are in natural log form.
+  - Model form:  
+    $$
+    \ln(Y) = \beta_0 + \beta_1 \ln(X) + \epsilon
+    $$
+
+- Interpretation:
+  - $\beta_1$ is the elasticity of $Y$ with respect to $X$.
+  - A 1% change in $X$ is associated with a $\beta_1\%$ change in $Y$.
+
+- Example with `mtcars`:
+```{r}
+# Log-Log example: ln(mpg) vs ln(wt)
+model_loglog <- lm(log(mpg) ~ log(wt), data = data)
+summary(model_loglog)
+```
+
+## Case Illustration and Comparisons
+
+- Fitting various models helps determine:
+  - Which transformation best explains the data.
+  - How to interpret relationships in terms of levels, changes, or elasticities.
+- Model comparison:
+  - Look at adjusted R-squared, AIC, or BIC to evaluate model fit.
+  - Review residuals and diagnostic plots for pattern detection.
+
+## Conclusion
+
+- Transformations can capture important non-linear patterns.
+- Linear-log and log-linear models focus on percentage changes.
+- Polynomial models capture curvilinear effects.
+- Log-log models estimate elasticity relationships.
+
+- Takeaways:
+  - Choose transformations to match theoretical expectations.
+  - Always interpret coefficients in the transformed context.
+  - Use diagnostics (residual plots, fit indices) to compare models.

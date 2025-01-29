@@ -1,0 +1,100 @@
+---
+title: "Econometrics - Lecture 3"
+subtitle: "Interpreting Regression Output"
+author: "Logan Kelly, Ph.D."
+date: "January 25, 2025"
+---
+
+## Introduction
+
+Understanding the output of a regression analysis is crucial for making informed decisions based on data. In this lecture, we will explore how to interpret the various components of regression output, including coefficients, R-squared, p-values, and confidence intervals. Additionally, we will visualize regression results by plotting data with a negative correlation and overlaying two best fit lines: one using Ordinary Least Squares (OLS) and another using OLS with the intercept restricted to zero.
+
+## Key Concepts
+
+- Components of Regression Output
+- Interpreting Coefficients
+- R-squared and Adjusted R-squared
+- Significance Levels and p-values
+- Confidence Intervals
+- Model Comparison: OLS vs. OLS with Intercept = 0
+
+## Theoretical Discussion
+
+### Components of Regression Output
+
+
+```{r}
+# Load the mtcars dataset
+data(mtcars)
+
+# Fit a simple linear regression model
+model <- lm(mpg ~ wt, data = mtcars)
+
+# View the summary of the model
+summary(model)
+```
+- **Call**: Displays the function call that generated the model.
+- **Residuals**: Summarizes the distribution of residuals (differences between observed and predicted values).
+- **Coefficients**: Estimates of $\beta_0$ (intercept) and $\beta_1$ (slope).
+- **Standard Errors**: Measure the variability of the coefficient estimates.
+- **t-values**: Ratio of coefficients to their standard errors, used to test hypotheses.
+- **p-values**: Indicate the probability of observing the data if the null hypothesis is true.
+- **R-squared ($R^2$)**:Proportion of variance in the dependent variable explained by the independent variable.
+- **F-statistic**: Tests the overall significance of the model.
+
+### Interpreting Coefficients
+
+- **Intercept ($\beta_0$)**
+  - Expected value of $y$ when $x = 0$.
+- **Slope ($\beta_1$)**
+  - Expected change in $y$ for a one-unit change in $x$.
+- **Sign**
+  - Indicates the direction of the relationship (positive or negative).
+- **t value**: The ratio of the estimate to its standard error, used to determine the significance of the coefficient.
+- **Pr(>|t|)**: The p-value corresponding to the t-value, indicating the probability of observing the data if the null hypothesis is true.
+
+Below is the regression table obtained from `summary(model)`:
+
+|                 | Estimate | Std. Error | t value | Pr(>|t|) |
+|-----------------|----------|------------|---------|----------|
+| (Intercept)     | 37.2851  | 1.8776     | 19.856  | < 2e-16  |
+| wt              | -5.3445  | 0.5591     | -9.559  | < 2e-16  |
+
+
+### R-squared and Adjusted R-squared
+
+- **R-squared ($R^2$)**
+  - Measures the proportion of variance in the dependent variable that is predictable from the independent variable.
+- **Adjusted R-squared**
+  - Adjusts $R^2$ for the number of predictors, providing a more accurate measure when multiple variables are involved. NOT measure of goodness-of-fit!
+
+### Significance Levels and p-values
+
+- **Null Hypothesis**
+  - Typically, $\beta_i = 0$ (no effect).
+- **p-value**
+  - Probability of obtaining test results at least as extreme as the observed results, under the assumption that the null hypothesis is correct.
+  - Low p-values (< 0.05) indicate statistical significance.
+
+### Confidence Intervals
+
+- **95% Confidence Interval**
+  - Range within which the true parameter value is expected to lie with 95% confidence.
+- **Interpretation**
+  - If the confidence interval for $\beta_1$ does not include zero, the coefficient is statistically significant at the 5% level.
+  
+```{r}
+# Load necessary libraries
+if (!require("pacman",quietly = TRUE)) install.packages("pacman")
+pacman::p_load(jtools)
+
+
+# View the summary of the model
+summ(model,confint = TRUE,ci.width = 0.95)
+```
+
+## Conclusion
+
+- Takeaway 1: Regression output includes key statistics such as coefficients, R-squared, p-values, and confidence intervals, each providing insights into the relationship between variables.
+- Takeaway 2: Understanding and interpreting these components is essential for drawing meaningful conclusions from regression analyses.
+- Takeaway 3: Visualizing regression results helps in comparing different model specifications and assessing the fit of the model to the data.

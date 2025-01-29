@@ -1,0 +1,22 @@
+# _quarto.yml
+
+project:
+  # The default project type in Quarto (no built-in site nav or extra metadata)
+  type: default
+
+  # Specify the folder where rendered output (HTML files) should be placed
+  output-dir: docs
+
+# Set default options for HTML output
+format:
+  html:
+    toc: false
+    toc-location: left
+    code-fold: true
+    self-contained: true
+    number-sections: true
+
+# Ensure R execution is enabled by default 
+execute:
+  enabled: true
+  freeze: auto

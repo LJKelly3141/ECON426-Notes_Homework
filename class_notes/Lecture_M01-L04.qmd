@@ -1,0 +1,238 @@
+---
+title: "Econometrics - Lecture 4"
+subtitle: "Diagnostic Plots & Model Assumptions"
+author: "Logan Kelly, Ph.D."
+date: "January 26, 2025"
+---
+
+## Introduction
+
+After establishing the fundamentals of simple linear regression and interpreting its output, it's essential to assess the validity of the regression model's assumptions. Diagnostic plots are powerful tools that help identify potential violations of these assumptions, ensuring that the Ordinary Least Squares (OLS) estimates remain reliable and unbiased. This lecture focuses on three key diagnostic plots: Residual Plots, QQ Plots for Normality of Residuals, and checks for Homoscedasticity (constant variance).
+
+## Key Concepts
+
+- Residual Plots
+- Normality of Residuals (QQ Plots)
+- Homoscedasticity (Constant Variance Check)
+
+## Theoretical Discussion
+
+### Residual Plots (Identifying Patterns)
+
+Residual plots display the residuals (differences between observed and predicted values) on the vertical axis against the fitted values or an independent variable on the horizontal axis. They help in identifying non-linearity, unequal error variances, and outliers.
+
+- **Purpose**: To assess whether the residuals exhibit any systematic patterns.
+- **Interpretation**:
+  - **No Pattern**: Suggests that the linear model is appropriate.
+
+```{r}
+# Load necessary libraries
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+pacman::p_load(ggplot2)
+
+# Simulate data with no pathology
+set.seed(100)
+x <- rnorm(100, mean = 50, sd = 10)
+y <- 5 + 2 * x + rnorm(100, mean = 0, sd = 5)
+data_no_pathology <- data.frame(x, y)
+
+# Fit linear model
+model_no_pathology <- lm(y ~ x, data = data_no_pathology)
+
+# Plot Residuals vs Fitted
+ggplot(data_no_pathology, aes(x = fitted(model_no_pathology), y = residuals(model_no_pathology))) +
+  geom_point(color = "black") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Residuals vs Fitted (No Pathology)",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+```
+  
+  - **Curvature)**: Indicates potential non-linearity.
+
+```{r}
+# Simulate data with nonlinearity
+set.seed(102)
+x <- seq(-3, 3, length.out = 100)
+y <- 5 + 2 * x + 1.5 * x^2 + rnorm(100, mean = 0, sd = 2)
+data_nonlinear <- data.frame(x, y)
+
+# Fit linear model
+model_nonlinear <- lm(y ~ x, data = data_nonlinear)
+
+# Plot Residuals vs Fitted
+ggplot(data_nonlinear, aes(x = fitted(model_nonlinear), y = residuals(model_nonlinear))) +
+  geom_point(color = "black") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Residuals vs Fitted (Nonlinearity)",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+```
+
+  - **Funnel Shape**: Suggests heteroscedasticity (non-constant variance).
+  
+
+```{r}
+# Simulate data with heteroscedasticity
+set.seed(101)
+x <- 1:100#rnorm(100, mean = 50, sd = 10)
+y <- 5 + 2 * x + rnorm(100, mean = 0, sd = x)
+data_heteroscedastic <- data.frame(x, y)
+
+# Fit linear model
+model_heteroscedastic <- lm(y ~ x, data = data_heteroscedastic)
+
+
+# Plot Residuals vs Fitted
+ggplot(data_heteroscedastic, aes(x = fitted(model_heteroscedastic), y = residuals(model_heteroscedastic))) +
+  geom_point(color = "black") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Residuals vs Fitted (Heteroscedasticity)",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+```
+
+  
+
+### Normality of Residuals (QQ Plots)
+
+QQ (Quantile-Quantile) plots compare the distribution of residuals to a normal distribution. This assessment is crucial for the validity of hypothesis tests and confidence intervals.
+
+- **Purpose**: To check if residuals are normally distributed.
+- **Interpretation**:
+  - **Points Along the Line**: Residuals are approximately normally distributed.
+  - **Deviations from the Line**: Indicate departures from normality, such as skewness or kurtosis.
+  
+```{r}
+# Set seed for reproducibility
+set.seed(13)
+
+# Example 1: Normal Residuals
+x_normal <- rnorm(100, mean = 50, sd = 10)
+y_normal <- 5 + 2 * x_normal + rnorm(100, mean = 0, sd = 10)
+model_normal <- lm(y_normal ~ x_normal)
+residuals_normal <- residuals(model_normal)
+
+# Histogram
+ggplot(data.frame(residuals_normal), aes(x = residuals_normal)) +
+  geom_histogram(aes(y = ..density..), bins = 20, fill = "lightblue", color = "black") +
+  geom_density(color = "red", size = 1) +
+  labs(title = "Histogram of Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+
+# QQ Plot
+ggplot(data.frame(residuals_normal), aes(sample = residuals_normal)) +
+  stat_qq(color = "darkgreen") +
+  stat_qq_line(color = "red") +
+  labs(title = "QQ Plot of Residuals",
+       x = "Theoretical Quantiles",
+       y = "Sample Quantiles") +
+  theme_minimal()
+
+
+```
+
+  
+  
+
+### Homoscedasticity (Constant Variance Check)
+
+Homoscedasticity means that the residuals have constant variance across all levels of the independent variable. Violations (heteroscedasticity) can lead to inefficient estimates and biased standard errors.
+
+- **Purpose**: To ensure that the variance of residuals is consistent.
+- **Interpretation**:
+  - **Constant Spread**: Indicates homoscedasticity.
+  - **Increasing or Decreasing Spread**: Suggests heteroscedasticity.
+
+## Case Study
+
+Let's apply these diagnostic tools to a regression model using the `mtcars` dataset, where we predict miles per gallon (`mpg`) based on weight (`wt`).
+
+### Step 1: Fit the Regression Model
+
+```{r}
+# Load the mtcars dataset
+data(mtcars)
+
+# Fit a simple linear regression model
+model <- lm(mpg ~ wt, data = mtcars)
+
+# View the summary of the model
+summary(model)
+```
+
+### Step 2: Generate Diagnostic Plots
+
+#### 1. Residual Plot
+
+```{r}
+# Residuals vs Fitted
+ggplot(data.frame(fitted.values = model$fitted.values, 
+                  residuals = model$residuals), 
+                  aes(x = fitted.values, y = residuals)) +
+  geom_point(color = "black") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Residuals vs Fitted",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+```
+
+
+#### 2. Normality of Residuals
+
+```{r}
+# Histogram
+ggplot(data.frame(residuals = model$residuals), aes(x = residuals)) +
+  geom_histogram(aes(y = ..density..), bins = 20, fill = "lightblue", color = "black") +
+  geom_density(color = "red", size = 1) +
+  labs(title = "Histogram of Residuals",
+       x = "Residuals",
+       y = "Density") +
+  theme_minimal()
+```
+
+**Interpretation**: Points should lie approximately on the reference line. Deviations suggest non-normality.
+
+### Step 3: Annotate the Regression Table
+
+Below is the regression table obtained from `summary(model)`:
+
+|                 | Estimate | Std. Error | t value | Pr(>|t|) |
+|-----------------|----------|------------|---------|----------|
+| (Intercept)     | 37.2851  | 1.8776     | 19.856  | < 2e-16  |
+| wt              | -5.3445  | 0.5591     | -9.559  | < 2e-16  |
+
+#### Annotations:
+
+- **(Intercept)**:
+  - **Estimate**: 37.2851
+    - Predicted `mpg` when `wt` is 0.
+  - **Std. Error**: 1.8776
+    - Measures the average distance that the estimated coefficients are from the actual value.
+  - **t value**: 19.856
+    - Indicates how many standard errors the coefficient is away from zero.
+  - **Pr(>|t|)**: < 2e-16
+    - Signifies that the intercept is statistically significant.
+
+- **wt**:
+  - **Estimate**: -5.3445
+    - For each additional 1000 lbs, `mpg` decreases by approximately 5.3445 units.
+  - **Std. Error**: 0.5591
+    - Reflects the precision of the slope estimate.
+  - **t value**: -9.559
+    - Shows the slope is significantly different from zero.
+  - **Pr(>|t|)**: < 2e-16
+    - Indicates that weight is a significant predictor of `mpg`.
+
+## Conclusion
+
+- Takeaway 1: **Residual Plots** help identify non-linearity, unequal error variances, and outliers, ensuring that the linear regression model is appropriate.
+- Takeaway 2: **QQ Plots** assess the normality of residuals, which is vital for reliable hypothesis testing and confidence intervals.
+- Takeaway 3: **Homoscedasticity Checks** ensure that the variance of residuals is constant across all levels of the independent variable, maintaining the efficiency of OLS estimates.
+

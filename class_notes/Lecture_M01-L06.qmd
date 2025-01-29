@@ -1,0 +1,216 @@
+---
+title: "Econometrics - Lecture 6"
+subtitle: "Categorical Predictors and Interaction Effects"
+author: "Logan Kelly Ph.D."
+date: "January 28, 2025"
+---
+
+## Introduction
+
+  - Categorical Predictors (Dummy Variables)
+  - Interaction Effects
+
+## Key Concepts
+
+- **Categorical Predictors (Dummy Variables)**
+  - Representing qualitative variables quantitatively
+  - Conversion of categorical data into binary indicators
+- **Inclusion of Factors in Regression Models**
+  - How R handles categorical data through factors
+  - Automatic creation of dummy variables
+- **Interpretation of Factor Levels**
+  - Understanding coefficients for different categories
+  - Reference category and its role in interpretation
+- **Interaction Effects**
+  - Concept of variables interacting to influence the dependent variable
+  - Identifying and specifying interactions in regression models
+- **Model Specification for Interactions**
+  - Syntax in R for including interaction terms (`x1 * x2` or `x1:x2`)
+- **Interpretation of Interaction Effects**
+  - How the effect of one variable changes based on the level of another variable
+
+## Theoretical Discussion
+
+### Categorical Predictors (Dummy Variables)
+
+- **Inclusion of Factors**
+  - **Factors in R:**
+    - R treats categorical variables as factors, which are internally represented as integers with associated labels
+    - When included in a regression model, R automatically generates dummy variables for each level except the reference category
+
+```{r}
+# Sample dataset
+data <- data.frame(
+  Salary = c(50000, 60000, 55000, 65000, 70000, 62000, 58000, 72000),
+  Education_ = factor(c('Bachelors', 'Masters', 'PhD', 'Bachelors', 'Masters', 'PhD', 'Bachelors', 'PhD')),
+  Experience = c(5, 7, 10, 6, 8, 12, 4, 15),
+  Gender_ = factor(c('Male', 'Female', 'Female', 'Male', 'Female', 'Male', 'Female', 'Male'))
+)
+```
+
+  - **Dummy Variable Coding:**
+    - Each level of a categorical variable is represented by a binary (0/1) variable
+    - Ensures that the model can estimate the effect of each category relative to the reference
+
+- **Interpretation of Factor Levels**
+  - **Coefficient Interpretation:**
+    - Each dummy variable's coefficient represents the difference in the dependent variable between that category and the reference category
+  - **Example:**
+    - If `Gender` has levels `Male` and `Female` (with `Male` as the reference), the coefficient for `Female` indicates the average change in the dependent variable when the subject is female compared to male
+
+Suppose we want to model the annual salary (`Salary`) of employees based on their years of experience (`Experience`) and gender (`Gender`). Here, `Gender` is a categorical variable with two categories:
+- **Male** (`Gender = 0`)
+- **Female** (`Gender = 1`)
+
+The regression equation incorporating the dummy variable for gender can be written as:
+
+$$
+\text{Salary} = \beta_0 + \beta_1 \times \text{Experience} + \beta_2 \times \text{Gender} + \epsilon
+$$
+
+Where:
+- $\beta_0$ is the intercept (the expected salary for the reference category when all predictors are zero).
+- $\beta_1$ is the coefficient for `Experience`, representing the change in salary for each additional year of experience.
+- $\beta_2$ is the coefficient for `Gender`, representing the difference in salary between females and males.
+- $\epsilon$ is the error term.
+
+Extensive form
+
+$$
+y=\begin{cases}\beta_{0} +\beta_{1} x\  +\varepsilon&\rm{if\ Gender\ =\ 0}\\ (\beta_{0} +\beta_2 )+\beta_{1} \times x+\varepsilon&\rm{if\ Gender\ =\ 1}\end{cases}
+$$
+
+- **Reference Category**
+  - **Choice of Reference:**
+    - The reference category is crucial as it serves as the baseline for comparison
+    - Changing the reference category alters the interpretation of all other coefficients
+  - **Impact on Interpretation:**
+    - Selecting a meaningful reference category enhances the interpretability of the model
+    - Typically, the most common or a neutral category is chosen as the reference
+```{r}
+model <- lm(Salary ~ Experience + Gender_, data = data)
+summary(model)
+```
+
+### Interaction Effects
+
+- **When & Why**
+  - **Theory Behind Interactions:**
+    - Interaction effects occur when the effect of one predictor variable on the dependent variable depends on the level of another predictor
+    - Captures the combined influence of two or more variables beyond their individual effects
+  - **Use Cases:**
+    - Situations where variables are believed to synergize or antagonize each other
+    - Enhances model flexibility and accuracy in capturing complex relationships
+
+- **Model Specification**
+  - Syntax in R:
+    - `Education * Experience` expands to `Education + Experience + Education:Experience`, including both main effects and their interaction
+    - `Education:Experience` includes only the interaction term without the main effects $$y=\begin{cases}\beta_{0} +\beta_{1} x\  +\varepsilon&\text{if\ Education = Bachelors}\\ \beta_{0} +(\beta_{1} +\beta_{2} ) \times x+\varepsilon&\text{if\ Education = Masters}\\ \beta_{0} +(\beta_{1} +\beta_{3} ) \times x+\varepsilon&\rm{if\ Education = PhD}\end{cases}$$
+  - Example:
+```{r}
+# Fit a model with interaction between Education and Experience
+model_interaction <- lm(Salary ~ Education_ * Experience, data = data)
+
+# Summary of the interaction model
+summary(model_interaction)
+```
+**Visualize interaction effect**
+
+```{r}
+pacman::p_load(ggplot2)
+ggplot(data, aes(x = Experience, y = Salary, color = Education_)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Interaction between Education and Experience on Salary",
+       x = "Years of Experience",
+       y = "Salary")
+```
+
+
+- **Interpretation**
+  - **Coefficient of Interaction Term:**
+    - Represents how the relationship between one predictor and the dependent variable changes with the level of the other predictor
+  - **Visualization:**
+    - Interaction effects can be visualized using interaction plots to illustrate how slopes differ across levels of interacting variables
+  - **Practical Implications:**
+    - Provides deeper insights into the dynamics between variables, aiding in more informed decision-making
+
+## Case Study
+
+- **Objective:**
+  - Analyze the impact of the number of gears and weight on a car's fuel efficiency (`mpg`), considering transmission type differences.
+
+- **Dataset Overview:**
+  - **Variables:**
+    - **mpg:** Dependent variable (miles per gallon)
+    - **gear:** Categorical predictor (number of forward gears: 3, 4, 5)
+    - **wt:** Independent variable (weight of the car in 1000 lbs)
+    - **am:** Categorical predictor (transmission type: 0 = automatic, 1 = manual)
+
+- **Methodology:**
+  - **Step 1:** Encode categorical variables (`gear` and `am`) as factors in R
+  
+```{r}
+# Load the mtcars dataset
+data <- mtcars
+
+# Encode 'gear' and 'am' as factors
+data$gear <- factor(data$gear, levels = c(3, 4, 5),
+                    labels = c("3 Gears", "4 Gears", "5 Gears"))
+data$am <- factor(data$am, levels = c(0, 1),
+                 labels = c("Automatic", "Manual"))
+```
+
+  - **Step 2:** Fit a multiple regression model including `gear` and `am` as categorical predictors
+  
+```{r}
+# Fit multiple regression model with categorical predictors
+model_main <- lm(mpg ~ gear + wt + am, data = data)
+summary(model_main)
+```
+  
+  - **Step 3:** Introduce an interaction term between `gear` and `wt` to explore combined effects
+
+```{r}
+# Fit regression model with interaction between gear and wt
+model_interaction <- lm(mpg ~ gear * wt + am, data = data)
+summary(model_interaction)
+```
+
+  - **Step 4:** F-test on interaction term 
+
+```{r}
+# Compare models
+anova(model_main, model_interaction)
+```
+
+  - **Step 5:** Visualize the results 
+  
+```{r}
+# Visualize interaction effect
+ggplot(data, aes(x = wt, y = mpg, color = gear)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Interaction between Number of Gears and Weight on MPG",
+       x = "Weight (1000 lbs)",
+       y = "Miles Per Gallon (MPG)")
+```
+  - **Step 6:** Residual Diagnostics
+  
+```{r}
+# Residuals vs Fitted Values Plot
+ggplot(model_interaction, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  geom_smooth(method = "loess", se = FALSE, color = "blue") +
+  labs(title = "Residuals vs Fitted Values",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+```
+
+## Conclusion
+
+  - Takeaway 1: Properly encoding and interpreting categorical variables is essential for accurate regression analysis
+  - Takeaway 2: Interaction effects reveal deeper insights into the relationships between predictors
+  - Takeaway 3: Model specification in R is straightforward, allowing for complex model building with interactions

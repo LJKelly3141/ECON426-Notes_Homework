@@ -1,0 +1,129 @@
+---
+title: "Econometrics - Lecture 2"
+subtitle: "Simple Linear Regression Basics"
+author: "Logan Kelly, Ph.D."
+date: "January 26, 2025"
+---
+
+## Introduction
+
+In this lecture, we delve into the basics of simple linear regression, focusing on the foundational idea that one independent variable $x$ can be used to predict a single dependent variable $y$. We will discuss the model setup (equation of a line), the interpretation of parameters (slope and intercept), and a basic coding example in R to illustrate how to estimate a simple regression model using `lm()`.
+
+## Key Concepts
+
+- Model Setup
+- Understanding Parameters
+- Reading and Writing R Code
+
+## Theoretical Discussion
+
+### Model Setup
+
+- **Equation of a Line**  
+  The simple linear regression model is expressed as:  
+  $$y = \beta_0 + \beta_1 x + \varepsilon$$  
+  where:
+  - $y$ is the dependent variable.
+  - $x$ is the independent variable.
+  - $\beta_0$ is the intercept.
+  - $\beta_1$ is the slope coefficient.
+  - $\varepsilon$ is the error term.
+
+
+### Understanding Parameters
+
+- **$\beta_0$ (Intercept)**  
+  - Represents the expected value of $y$ when $x = 0$.
+  - Indicates the baseline level of the dependent variable.
+  
+```{r, echo = FALSE}
+# Generate data with negative correlation
+set.seed(123)
+x <- 1:100
+y <- 100 - 1 * x + rnorm(100, mean = 0, sd = 20)  # Negative correlation
+
+# Create a data frame
+data_neg <- data.frame(x, y)
+
+# Fit OLS model with intercept
+model_ols <- lm(y ~ x, data = data_neg)
+
+# Fit OLS model without intercept
+model_no_intercept <- lm(y ~ x + 0, data = data_neg)
+
+# Plot scatter plot
+plot(data_neg$x, data_neg$y, main = "Scatter Plot with OLS and No-Intercept Regression Lines",
+     xlab = "Independent Variable (x)", ylab = "Dependent Variable (y)",
+     pch = 19, col = "blue")
+
+# Add OLS regression line
+abline(model_ols, col = "red", lwd = 2)
+
+# Add no-intercept regression line
+abline(model_no_intercept, col = "green", lwd = 2, lty = 2)
+
+# Add legend
+legend("topright", legend = c("OLS with Intercept", "OLS without Intercept"),
+       col = c("red", "green"), lwd = 2, lty = c(1, 2))
+```
+  
+- **$\beta_1$ (Slope)**  
+  - Measures the expected change in $y$ for a one-unit change in $x$.
+  - Indicates the strength and direction of the relationship between $x$ and $y$.
+
+- **$\varepsilon$ (Error Term)**  
+  - Captures all other factors affecting $y$ that are not included in the model.
+  - Assumed to have a mean of zero:  
+    $$\mathrm{E}(\varepsilon) = 0$$  
+  - Represents random variability in the dependent variable.
+
+### Reading and Writing R Code
+
+- **Estimating a Simple Linear Regression Model in R**  
+  The `lm()` function is used to fit linear models. Below is a basic example:
+
+```{r}
+# Example dataset
+data(mtcars)
+
+# Fit a simple linear regression model
+model <- lm(mpg ~ wt, data = mtcars)
+
+# View the summary of the model
+summary(model)
+```
+
+- **Interpreting the Output**  
+  - **Coefficients**: Estimates of $\beta_0$ and $\beta_1$.
+  - **R-squared**: Proportion of variance in $y$ explained by $x$.
+  - **p-values**: Test the null hypothesis that the coefficient is equal to zero.
+
+## Case Study
+
+Consider a dataset examining the relationship between **advertising expenditures** (in thousands of dollars) and **monthly sales** (in thousands of units). Suppose we have the following R code to estimate a simple linear regression:
+
+```{r}
+pacman::p_load_gh("ccolonescu/PoEdata")
+pacman::p_load("jtools")
+data(food)
+
+# Fit a simple linear regression model
+model <- lm(food_exp ~ income, data = food)
+
+# View the summary
+summ(model)
+```
+
+- **Interpretation**  
+  - $\hat{\beta}_0$: Predicted sales when advertising expenditures are zero (the intercept).
+  - $\hat{\beta}_1$: Average change in sales (in thousands of units) for each additional thousand dollars in advertising.
+
+- **Assessing Model Fit**  
+  - **R-squared**: Indicates how well the independent variable explains the variation in the dependent variable.
+  - **Residual Analysis**: Check for patterns that might suggest violations of regression assumptions.
+
+## Conclusion
+
+- A simple linear regression assumes a direct, linear relationship between one independent variable and the dependent variable.
+- OLS estimation finds the best-fitting line by minimizing the sum of squared errors, producing unbiased estimates of slope and intercept under the classic assumptions.
+- Practical coding in R typically involves `lm()`, which quickly estimates parameters and provides summary statistics for model evaluation.

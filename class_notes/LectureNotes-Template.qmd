@@ -1,0 +1,32 @@
+---
+title: "Econometrics - Lecture 1"
+subtitle: "Linear Regression"
+author: "Logan Kelly Ph.D."
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+---
+
+## Introduction
+
+
+
+## Key Concepts
+
+
+
+## Theoretical Discussion
+
+
+
+
+## Case Study
+
+
+
+## Conclusion
+
+- **Takeaway 1**  
+- **Takeaway 2**  
+- **Takeaway 3**  
+
+
+Use bullet points throught out

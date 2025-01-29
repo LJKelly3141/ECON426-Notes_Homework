@@ -1,0 +1,274 @@
+---
+title: "Econometrics - Lecture 5"
+subtitle: "Multiple Linear Regression"
+author: "Logan Kelly, Ph.D."
+date: "January 28, 2025"
+---
+
+## Introduction
+
+- In this lecture, we extend the simple linear regression framework to include multiple predictors.
+- This approach allows us to understand the impact of each independent variable on the dependent variable while controlling for other factors.
+- By adding more predictors, we can better capture the complexity of real-world relationships and reduce omitted variable bias.
+
+## Key Concepts
+
+- Adding More Predictors
+- Partial Effects (Controlling for Other Variables)
+- Interpretation Nuances (Coefficients in Multiple Regression)
+- Model Selection & Fit Criteria
+
+## Theoretical Discussion
+
+A multiple linear regression model with two predictors can be written as:
+
+$$
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots + \varepsilon
+$$
+
+- $y$: The dependent variable  
+- $x_1, x_2, \dots$: Independent variables (predictors)  
+- $\beta_0$: The intercept, representing the expected value of $y$ when all predictors are zero  
+- $\beta_1, \beta_2, \dots$: Slope coefficients, each indicating how $y$ changes with a one-unit increase in the corresponding predictor, holding other variables constant  
+- $\varepsilon$: The error term, assumed to have a mean of zero if the model is correctly specified
+
+### Partial Effects and Controlling for Other Variables
+
+- Partial Effect: In a multiple regression, $\beta_1$ represents the expected change in $y$ for a one-unit increase in $x_1$, holding $x_2, x_3, \dots$ constant.  
+- Mathematically, each coefficient is the change in y divided by the chnge in $x_j$, i.e. $$\beta_j = \frac{\partial y}{\partial x_j}$$  
+- Importance of Controlling: By including additional predictors, we can isolate the effect of each variable and reduce omitted variable bias.
+
+```{r, echo=FALSE, warning=FALSE, fig.width=4}
+# Load necessary libraries
+if (!requireNamespace("pacman", quietly = TRUE)) install.packages("pacman")
+pacman::p_load(plotly, knitr, magick)
+
+# Load the mtcars dataset
+data(mtcars)
+
+# Fit a multiple regression model
+model <- lm(mpg ~ wt + hp, data = mtcars)
+
+# Create a grid of values for wt and hp
+wt_grid <- seq(min(mtcars$wt), max(mtcars$wt), length.out = 30)
+hp_grid <- seq(min(mtcars$hp), max(mtcars$hp), length.out = 30)
+
+# Create a grid of points (combinations of wt and hp)
+grid <- expand.grid(wt = wt_grid, hp = hp_grid)
+
+# Predict mpg for each combination of wt and hp using the model
+grid$mpg <- predict(model, newdata = grid)
+
+# Create the 3D scatter plot
+fig <- plot_ly(mtcars, x = ~wt, y = ~hp, z = ~mpg, type = "scatter3d", mode = "markers", showlegend = FALSE) %>%
+  add_surface(x = ~wt_grid, y = ~hp_grid, z = matrix(grid$mpg, nrow = length(wt_grid)), 
+              showscale = FALSE, opacity = 0.5) %>%
+  layout(scene = list(
+           xaxis = list(title = 'Weight'),
+           yaxis = list(title = 'Horsepower'),
+           zaxis = list(title = 'Miles per Gallon'),
+           camera = list(
+             eye = list(x = 2, y = 2, z = 2)  # Adjust this to zoom out
+           )),
+         showlegend = FALSE,
+         margin = list(l = 0, r = 0, b = 0, t = 0),
+         showlegend = FALSE) %>%
+  config(displayModeBar = FALSE)
+
+# Conditional rendering based on output format
+if (knitr::is_html_output()) {
+  fig  # Render the interactive plot in HTML output
+} else if (knitr::is_latex_output()) {
+  # Save the plotly figure as a larger static image using orca
+  orca(fig, file = "img/3d_plot_large.png", width = 3200, height = 2400)
+  
+  # Load and crop the image using magick
+  image <- image_read("img/3d_plot_large.png")
+  cropped_image <- image_trim(image, fuzz = 0)#?image_crop(image, "1200x900+100+100")  # Adjust crop dimensions as needed
+  
+  # Save the cropped image
+  image_write(cropped_image, path = "img/3d_plot_cropped.png")
+  
+  # Include the cropped image in the PDF output
+  knitr::include_graphics("img/3d_plot_cropped.png")
+  
+}
+```
+
+### Interpretation Nuances
+
+- Coefficient Magnitude: Each $\beta_j$ shows how $y$ changes with $x_j$, keeping other predictors fixed.  
+- Significance and p-values: Determine if $\beta_j$ is significantly different from zero.  
+- Multicollinearity: Highly correlated predictors can inflate standard errors, complicating interpretation.  
+- Model Fit: Metrics like Adjusted R-squared become more relevant when comparing models with different numbers of predictors.
+
+Model selection involves determining which predictors to include in a multiple regression model, balancing model performance with interpretability. Below is an overview of common techniques and considerations for selecting and evaluating models.
+
+### Forward, Backward, Stepwise Selection
+
+- Forward. Begin with no predictors, adding them one at a time based on a selection criterion (for instance, a p-value threshold or an information criterion).  
+- Backward. Start with all candidate predictors, removing them one at a time, typically removing the least significant predictor at each step.  
+- Stepwise. Combine forward and backward methods by iteratively adding or removing predictors, attempting to find an optimal subset.
+
+### Pro's and Con's
+
+- Pros of these approaches include the automated narrowing of large predictor sets. 
+- However, can be sensitive to the order in which variables enter or leave the model
+- potentially result in overfitting.
+
+### Model Selection & Fit Criteria
+
+Model selection involves determining which predictors to include in a multiple regression model, balancing model performance with interpretability. Below is an overview of common techniques and considerations for selecting and evaluating models.
+
+- Forward, Backward, Stepwise Selection
+
+  - Forward: Begin with no predictors, adding them one at a time based on a selection criterion such as a p-value threshold or an information criterion like AIC.
+  
+  - Backward: Start with all candidate predictors, removing them one at a time, typically removing the least significant predictor at each step.
+  
+  - Stepwise: Combine forward and backward methods by iteratively adding or removing predictors, attempting to find an optimal subset.
+  
+  - **Pros:** Automated procedure, helps narrow down large sets of predictors.
+  
+  - **Cons:** Can overlook important predictors or retain irrelevant ones, sensitive to the order of entry or removal, may lead to overfitting.
+
+- AIC and BIC (Information Criteria)
+
+  Information criteria provide a way to compare model fit while penalizing excessive complexity. They are based on the log-likelihood function of the model.
+
+  The **Log-Likelihood Function** for a multiple linear regression model assuming normally distributed errors is:
+
+  $$
+  \ln(L) = -\frac{n}{2} \ln(2\pi\sigma^2) - \frac{1}{2\sigma^2} \sum_{i=1}^n (y_i - \hat{y}_i)^2
+  $$
+
+  where  
+  - $n$ is the number of observations,  
+  - $\sigma^2$ is the variance of the error term,  
+  - $\hat{y}_i$ is the predicted value of $y_i$.
+
+  The **Akaike Information Criterion (AIC)** and **Bayesian Information Criterion (BIC)** are defined as:
+
+  $$
+  \text{AIC} = 2k - 2\ln(\hat{L})
+  $$
+  
+  $$
+  \text{BIC} = k\ln(n) - 2\ln(\hat{L})
+  $$
+  
+  where  
+  - $k$ is the number of parameters in the model,  
+  - $\ln(\hat{L})$ is the maximized value of the log likelihood function for the model,  
+  - $n$ is the sample size.
+
+**Use Cases:**
+  
+  - **AIC** is generally preferred when the primary goal is to selecting a structural model. It balances model fit with complexity but imposes a lighter penalty for additional parameters, making it suitable for scenarios where overfitting is less of a concern than omited variable bias.
+  
+  - **BIC** is often favored when the goal is prediction. It imposes a heavier penalty for additional parameters, which can be advantageous in avoiding overfitting and selecting simpler models.
+  
+  - **Comparing Models**: When comparing models that predict the same outcome variable, a difference of about 2–7 points in AIC or BIC indicates moderate evidence in favor of the model with the lower score.
+
+*Practical Tips*
+
+  - Do not rely solely on p-values. Incorporate theoretical considerations, domain expertise, and additional metrics such as adjusted R-squared, AIC, or BIC.
+  
+  - Check diagnostics. Even models that look good on paper can fail if they violate OLS assumptions such as linearity or homoscedasticity.
+  
+  - Aim for parsimony. Strive for a balance between simplicity and explanatory power to avoid overfitting and to keep the model interpretable.
+
+## Case Study
+
+We will perform a multiple regression analysis using the `mtcars` dataset to predict `mpg` based on all other variables. The steps include loading the data, estimating the model, selecting the best model using AIC and BIC, and visualizing the residuals.
+
+**Step 1: Load Data**
+
+```{r}
+# Load necessary libraries
+pacman::p_load(olsrr, ggplot2)
+
+# Load the mtcars dataset
+data(mtcars)
+```
+
+**Step 2: Estimate the Full Model**
+
+Estimate a multiple linear regression model with `mpg` as the dependent variable and all other variables as independent variables.
+
+```{r}
+# Fit the full multiple linear regression model
+full_model <- lm(mpg ~ ., data = mtcars)
+
+# View the summary of the full model
+summary(full_model)
+```
+
+**Step 3: Model Selection Using AIC and BIC**
+
+Use the `olsrr` package to perform model selection based on AIC and BIC criteria.
+
+*AIC Model*
+
+```{r}
+# Forward selection based on AIC
+model_aic <-  ols_step_both_aic(full_model, details = FALSE)
+model_aic
+```
+
+*BIC Model*
+
+```{r}
+# Backward selection based on BIC
+model_bic <-  ols_step_both_sbc(full_model, details = FALSE)
+model_bic
+```
+
+*Explanation:*
+
+- **AIC (Akaike Information Criterion)**: Balances model fit with complexity. Lower AIC indicates a better model.
+- **BIC (Bayesian Information Criterion)**: Similar to AIC but imposes a heavier penalty for additional parameters, favoring simpler models. Lower BIC indicates a better model.
+
+By comparing AIC and BIC, we can select a model that adequately fits the data without unnecessary complexity.
+
+
+
+**Step 4: Residuals vs. Fitted Plot**
+
+Plot the residuals versus fitted values to assess the assumptions of linearity and homoscedasticity.
+
+```{r}
+# Plot Residuals vs Fitted for the selected model (AIC)
+ggplot(model_aic$model, aes(x = fitted(model_aic$model), y = resid(model_aic$model))) +
+  geom_point(color = "blue") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(title = "Residuals vs Fitted (AIC Selected Model)",
+       x = "Fitted Values",
+       y = "Residuals") +
+  theme_minimal()
+```
+
+
+**Step 5: Plot Histograms of Residuals**
+
+Visualize the distribution of residuals to assess normality.
+
+```{r}
+# Histogram of Residuals for the selected model (AIC)
+ggplot(model_aic$model, aes(x = resid(model_aic$model))) +
+  geom_histogram(binwidth = 1, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Residuals (AIC Selected Model)",
+       x = "Residuals",
+       y = "Frequency") +
+  theme_minimal()
+```
+
+
+## Conclusion
+
+- Takeaway 1: Multiple linear regression captures more complex relationships by including additional predictors, reducing omitted variable bias.
+- Takeaway 2: Coefficients in multiple regression represent partial effects, showing how the dependent variable changes with one predictor while controlling for others.
+- Takeaway 3: Model selection and fit criteria (like AIC, BIC, and stepwise methods) can guide which predictors to include, but practical judgment and theoretical considerations remain essential.
+
+
+
