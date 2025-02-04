@@ -12,11 +12,11 @@ In this assignment, you will practice using **R**, **RStudio Cloud** (hosted on 
 
 1. **Join the Class Workspace**  
    If you have not joined the class workspace yet, please use the following link:  
-   [Join Class Workspace](https://posit.cloud/spaces/605675/join?access_code=Js3OPYFsmb02-lu9ANwDVyD99JWafdiOTG66yKwE)
+   [Join Class Workspace](https://posit.cloud/spaces/605675/join?access_code=Js3OPYFsmb02-lu9ANwDVyD99JWafdiOTG66yKwE){target="_blank"}
 
 2. **Access the RStudio Cloud Project**  
    Once you have joined the workspace, access the RStudio Cloud Project using this link:  
-   [Access the Project](https://posit.cloud/spaces/605675/content/9686609)
+   [Access the Project](https://posit.cloud/spaces/605675/content/9686609){target="_blank"}
 
 3. **Open the Assignment File**  
    Within the project, locate the Quarto or RMarkdown file named `CaseXX.qmd` or `CaseXX.Rmd` (where “XX” corresponds to the current case number). Open this file to view the assignment instructions and follow the embedded directions.

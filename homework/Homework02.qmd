@@ -1,0 +1,113 @@
+---
+title: "ECON426: Data Handling Case Assignment"
+format:
+  html:
+    code-fold: false
+    number-sections: false
+---
+
+In this case, you will practice working with data using **R**, **RStudio Cloud** (hosted on Posit Cloud), and **Quarto** or **RMarkdown**. Follow the directions below to complete the tasks and produce a nicely formatted document.
+
+### Getting Started
+
+1. **Join the Class Workspace**  
+   If you have not joined the class workspace yet, please use the following link:  
+   [Join Class Workspace](https://posit.cloud/spaces/605675/join?access_code=Js3OPYFsmb02-lu9ANwDVyD99JWafdiOTG66yKwE){target="_blank"}
+
+2. **Access the RStudio Cloud Project**  
+   Once you have joined the workspace, access the project via this link:  
+   [Access the Project](https://posit.cloud/spaces/605675/content/9686609){target="_blank"}
+
+3. **Open the Assignment File**  
+   Within the project, locate the Quarto or RMarkdown file named `CaseXX.qmd` or `CaseXX.Rmd` (where “XX” corresponds to the current case number). Open this file and follow the directions provided.
+
+4. **Submission Instructions**  
+   After completing the case, knit or render your file to produce an MS Word document (.docx). Submit this document to the Canvas Dropbox.
+
+## Assignment Tasks
+
+### 1. Load Packages
+
+A. **Install the pacman Package**  
+   In the console (the lower left quadrant of RStudio), install the **pacman** package by running:  
+```{r}
+if(!require("pacman")) install.packages("pacman")
+```
+
+B. **Install Required Packages Using pacman**  
+   Use the **pacman** package to install the **tidyverse** and **psych** packages with the following command:  
+```{r}
+pacman::p_load("tidyverse", "psych")
+```  
+   *Note: There is no need to submit anything for this step. Ensure you complete this part correctly to proceed with the case.*
+
+### 2. Load, View, and Summarize Data
+
+A. **Load the Data**  
+   The dataset `cholesterol.csv` contains information from a study testing whether cholesterol was reduced after using a certain brand of margarine as part of a low fat, low cholesterol diet. Participants consumed, on average, 2.31g of the active ingredient, stanol ester, per day. The dataset includes information on 18 people measured over three time points. The variables are as follows:
+
+   | Variable Name | Description                                                  |
+   |---------------|--------------------------------------------------------------|
+   | **ID**        | Participant number                                           |
+   | **Before**    | Cholesterol before the diet (mmol/L)                         |
+   | **After4weeks** | Cholesterol after 4 weeks on the diet (mmol/L)              |
+   | **After8weeks** | Cholesterol after 8 weeks on the diet (mmol/L)              |
+   | **Margarine** | Margarine type A or B                                          |
+
+   - Use the `read.csv()` function to load the data into a data frame named `cholesterol`:
+```{r}
+cholesterol <- read.csv("../data/cholesterol.csv")
+```
+     *(Note: The file `cholesterol.csv` is already available in the project folder.)*
+
+   - Use the `head()` function to display the first few rows of the data frame:
+```{r}
+head(cholesterol)
+```
+
+   - Use the `plot()` function to create scatter plots of the data:
+```{r}
+plot(cholesterol)
+```
+
+B. **Save the Data Frame**  
+   Save the `cholesterol` data frame as an R data file named `cholesterol.Rdata` using the `save()` function:
+```{r}
+save(cholesterol, file = "cholesterol.Rdata")
+```
+
+### 3. Describe the Data Set
+
+A. **Convert Variable to Factor**  
+   Convert the variable `Margarine` to a factor using the `as.factor()` function:
+```{r}
+cholesterol$Margarine <- as.factor(cholesterol$Margarine)
+```
+   Then, use the `head()` function to display the first few rows of the updated data frame:
+```{r}
+head(cholesterol)
+```
+
+B. **Summary Statistics**  
+   Calculate summary statistics for the `cholesterol` data frame using the `describe()` function from the **psych** package. Set the parameters `skew` and `ranges` to `FALSE`:
+```{r}
+describe(x = cholesterol, skew = FALSE, ranges = FALSE)
+```
+
+C. **Create a Formula**  
+   Create a formula to calculate the average cholesterol reduction after eight weeks:
+```{r}
+EightWeeksByType <- After8weeks ~ Margarine
+```
+
+D. **Summary Statistics by Margarine Type**  
+   Using the formula created above, calculate summary statistics for cholesterol reduction after eight weeks by margarine type:
+```{r}
+describe(EightWeeksByType, data = cholesterol, skew = FALSE, ranges = FALSE)
+```
+
+**Formatting Instructions:**
+
+- **Nicely Format Your Results:** Use Quarto or RMarkdown to clearly present your code and outputs.
+- **Render to MS Word:** Once your work is complete, render your file to produce an MS Word (.docx) document.
+- **Submission:** Upload the rendered document to the Canvas Dropbox.
