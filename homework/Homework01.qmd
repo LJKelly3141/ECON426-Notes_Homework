@@ -1,0 +1,79 @@
+---
+title: "ECON426: R, RStudio Cloud, and Quarto Case Assignment"
+format:
+  html:
+    code-fold: false
+    number-sections: false
+---
+
+In this assignment, you will practice using **R**, **RStudio Cloud** (hosted on Posit Cloud), and **Quarto** or **RMarkdown** to complete a series of tasks and produce a well-formatted document.
+
+## Getting Started
+
+1. **Join the Class Workspace**  
+   If you have not joined the class workspace yet, please use the following link:  
+   [Join Class Workspace](https://posit.cloud/spaces/605675/join?access_code=Js3OPYFsmb02-lu9ANwDVyD99JWafdiOTG66yKwE)
+
+2. **Access the RStudio Cloud Project**  
+   Once you have joined the workspace, access the RStudio Cloud Project using this link:  
+   [Access the Project](https://posit.cloud/spaces/605675/content/9686609)
+
+3. **Open the Assignment File**  
+   Within the project, locate the Quarto or RMarkdown file named `CaseXX.qmd` or `CaseXX.Rmd` (where “XX” corresponds to the current case number). Open this file to view the assignment instructions and follow the embedded directions.
+
+4. **Submission Instructions**  
+   After completing the case, render your file to create an MS Word document (.docx). Submit this document to the Canvas Dropbox
+
+## Assignment Tasks
+
+### Part 1. Basic Commands
+
+Using R, perform the following calculations. Store each result in a variable as indicated:
+
+1. **Addition**  
+   - Calculate the sum of 2 and 3.  
+   - Store your result in a variable named `a`.
+
+2. **Subtraction**  
+   - Calculate the difference between 5 and 8.  
+   - Store your result in a variable named `b`.
+
+3. **Multiplication**  
+   - Calculate the product of 3 and 5.  
+   - Store your result in a variable named `c`.
+
+4. **Square Root**  
+   - Use the `sqrt()` function to compute the square root of 4.  
+   - Store your result in a variable named `d`.
+
+### Part 2. Logical Tests
+
+Assume the following variable assignments in R:
+
+```{r}
+a <- 5
+b <- 2
+c <- 5
+d <- "five"
+e <- "two"
+f <- "Two"
+g <- TRUE
+```
+
+Evaluate the following true/false statements using R logical operators and comparisons (Hint: Use R to answer the question. I know you can evaluate the statements.):
+
+1. Is `a` equal to `d`?
+2. Is it true that `a` equals `b + 3` **and** `a` equals `c`?
+3. Is `e` equal to `f`?
+4. Is it true that `a` equals `b + 3` **or** `a` equals `c`?
+5. Is `d` equal to `"five"`?
+6. Is `a` not equal to `c`?
+7. Is it true that `a` is less than 10 **or** `a` is greater than or equal to 5?
+8. Is `g` false?
+
+
+**Formatting Instructions:**
+
+- **Nicely Format Your Results:** Use Quarto or RMarkdown to clearly present your code and results.
+- **Render to MS Word:** Once your work is complete, render your file to produce an MS Word (.docx) document.
+- **Submission:** Upload the rendered document to the Canvas Dropbox.
