@@ -1,0 +1,164 @@
+---
+title: "ECON426: Analyzing the CPS Dataset with tidyverse"
+format:
+  html:
+    code-fold: false
+    number-sections: false
+---
+
+# Introduction
+
+In this project you will analyze the **cps5** dataset from the **POE5Rdata** package. Your objective is to build a linear regression model to predict wage using numeric predictors (such as age, educ, exper, faminc, hrswork, and nchild). Each step of the analysis—from data loading and exploratory data analysis (EDA) to model building and diagnostics—should be performed on the cps5 dataset. For guidance, examples using the built-in **mtcars** dataset are provided below, along with explanations of what each example does.
+
+# 1. Data Loading
+
+**Objective:**  
+Load the required packages and the **cps5** dataset.
+
+**Instructions for cps5 Project:**
+
+- Use the provided code to load the tidyverse packages.
+- Load the **cps5** dataset using the GitHub command.
+- Briefly inspect the dataset structure with `glimpse()`.
+
+```{r}
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse,GGally,broom)
+
+# Load the cps5 dataset from the POE5Rdata package
+pacman::p_load_gh("ccolonescu/POE5Rdata")
+data("cps5")
+
+# Inspect the cps5 dataset structure
+glimpse(cps5)
+```
+
+**Explanation:**  
+This code checks if the **pacman** package is installed and installs it if necessary. It then loads the tidyverse collection for data manipulation and visualization. Next, it loads the cps5 dataset from the POE5Rdata package hosted on GitHub. Finally, the `glimpse()` function provides a quick overview of the dataset's structure (variables and their types) so you know what data you’re working with.
+
+*Example (mtcars):*  
+In a typical analysis, you might inspect the mtcars dataset in a similar way. (For this project, focus on cps5.)
+
+# 2. Exploratory Data Analysis (EDA)
+
+**Objective:**  
+Explore the cps5 dataset by calculating summary statistics and creating visualizations for the numeric variables. For the cps5 project, focus on:
+- **Outcome:** `wage`
+- **Predictors:** `age`, `educ`, `exper`, `faminc`, `hrswork`, `nchild`
+
+**Instructions for cps5 Project:**
+
+- Generate summary statistics for the selected numeric variables.
+- Create visualizations (such as scatter plots, histograms, or pairwise plots) to explore relationships.
+- Write a brief interpretation of any patterns or relationships you observe.
+
+*Example using mtcars:*  
+Below is an example of how to perform EDA on the mtcars dataset (using variables `mpg`, `wt`, and `hp`), along with an explanation.
+
+```{r}
+# Load the mtcars dataset (built-in)
+data(mtcars)
+
+# Summary statistics for selected numeric variables
+mtcars %>% 
+  select(mpg, wt, hp) %>% 
+  summary()
+```
+
+**Explanation:**  
+This code selects three variables (mpg, wt, and hp) from the mtcars dataset and computes summary statistics such as the mean, median, and quartiles. This helps you understand the central tendency and spread of the data, which is crucial for identifying potential outliers or unusual patterns.
+
+```{r}
+# Create a pairwise scatter plot using GGally
+mtcars %>%
+  select(mpg, wt, hp) %>%
+  ggpairs(title = "Pairwise Plots: mpg, wt, hp")
+```
+
+**Explanation:**  
+This code creates pairwise scatter plots for the selected variables using the `ggpairs()` function from the GGally package. The pairwise plot allows you to visually inspect the relationships between every pair of variables. For the cps5 dataset, you will create similar plots for wage and its numeric predictors.
+
+# 3. Model Building
+
+**Objective:**  
+Fit a linear regression model to predict the outcome variable using numeric predictors.
+
+**Instructions for cps5 Project:**
+
+- Build a linear regression model to predict `wage` using the numeric predictors (`age`, `educ`, `exper`, `faminc`, `hrswork`, and `nchild`) from the cps5 dataset.
+- Display and interpret the summary of your model.
+- *Note:* Do not include the actual cps5 modeling code in your submission document here; complete the modeling on your local copy after reviewing the mtcars example.
+
+*Example using mtcars:*  
+Below is an example model built with the mtcars dataset to predict `mpg` using `wt` and `hp`. An explanation follows.
+
+```{r}
+# Fit a linear model predicting mpg using wt and hp in mtcars
+model_mtcars <- lm(mpg ~ wt + hp, data = mtcars)
+summary(model_mtcars)
+```
+
+**Explanation:**  
+This code fits a linear regression model using the `lm()` function, where `mpg` is the outcome and `wt` and `hp` are the predictors. The `summary()` function displays key information such as the coefficients, R-squared value, and p-values. These results help you evaluate the significance of the predictors and the overall fit of the model. For the cps5 project, replicate this process by modeling wage as a function of the numeric predictors.
+
+# 4. Model Diagnostics
+
+**Objective:**  
+Evaluate your regression model by generating diagnostic plots.
+
+**Instructions for cps5 Project:**
+
+- Using your cps5 model (built in step 3), generate diagnostic plots:
+  - **Actual vs. Fitted Values:** Compare predicted wage values with the actual wages.
+  - **Residuals vs. Fitted Values:** Check for patterns that might indicate non-linearity or heteroscedasticity.
+- Write a brief discussion of your findings based on these plots.
+
+*Example using mtcars:*  
+Below is an example of how to perform model diagnostics on the mtcars model. An explanation of the code is provided.
+
+```{r}
+# Augment the mtcars model with diagnostic measures
+mtcars_aug <- augment(model_mtcars)
+
+# Actual vs. Fitted Values Plot
+ggplot(mtcars_aug, aes(x = .fitted, y = mpg)) +
+  geom_point(alpha = 0.7) +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "mtcars: Actual vs. Fitted mpg", x = "Fitted mpg", y = "Actual mpg")
+```
+
+**Explanation:**  
+Here, the `augment()` function from the broom package is used to add diagnostic metrics (fitted values, residuals, etc.) to the mtcars model. The first plot shows actual mpg values against the model's fitted values. The red dashed line represents a perfect fit (where fitted equals actual). This visualization helps assess how well the model predicts the outcome.
+
+```{r}
+# Residuals vs. Fitted Values Plot
+ggplot(mtcars_aug, aes(x = .fitted, y = .resid)) +
+  geom_point(alpha = 0.7) +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+  labs(title = "mtcars: Residuals vs. Fitted Values", x = "Fitted mpg", y = "Residuals")
+```
+
+**Explanation:**  
+The second plot visualizes the residuals (errors) versus the fitted values. A horizontal red dashed line is drawn at zero to indicate where residuals should ideally be centered if the model fits well. If the residuals are randomly dispersed around zero, this supports the assumptions of linearity and homoscedasticity. When you apply these diagnostics to your cps5 model, look for similar patterns to validate your model assumptions.
+
+# 5. Reporting
+
+**Objective:**  
+Compile your analysis into a comprehensive report.
+
+**Instructions for cps5 Project:**
+
+- Prepare a well-organized report in a single Quarto document.
+- Your report should include the following sections:
+  - **Introduction:** Describe your approach and the cps5 dataset.
+  - **Exploratory Data Analysis:** Summarize your EDA findings from the cps5 dataset, including key insights from summary statistics and visualizations.
+  - **Model Building:** Present the output of your linear regression model (fitted on cps5) and interpret the estimated coefficients.
+  - **Model Diagnostics:** Discuss your diagnostic plots and assess whether the model assumptions appear valid.
+- Ensure your code is well-commented, your plots are clearly labeled, and your written discussion is thorough.
+- Use the mtcars examples and explanations as a guide to structure your cps5 analysis.
+
+# Submission Instructions
+
+- **Nicely Format Your Results:** Use Quarto or RMarkdown to clearly present your code and outputs.
+- **Render to MS Word:** Once your work is complete, render your file to produce an MS Word (.docx) document.
+- **Submission:** Upload the rendered document to the Canvas Dropbox.
