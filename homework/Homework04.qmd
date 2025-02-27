@@ -1,0 +1,264 @@
+---
+title: "ECON426: Further Inference in Multiple Regression using cps5 Data"
+format:
+  html:
+    code-fold: false
+    number-sections: false
+---
+
+# Introduction
+
+In this assignment you will extend your cps5 data project by exploring advanced topics in multiple regression inference. You will examine joint hypotheses, test simultaneous restrictions, assess omitted variable bias, evaluate the impact of irrelevant variables, compare model selection criteria, and check for collinearity. Although your final analysis must be performed on the cps5 dataset, the step‐by‐step instructions and example code below use the built‑in mtcars dataset as a model. Carefully study each section and then replicate the analyses using cps5.
+
+The topics you will cover are:
+
+1. Data Loading and Setup  
+2. Joint Hypotheses and the F‑Statistic  
+3. Testing Simultaneous Hypotheses  
+4. Omitted Variable Bias  
+5. Irrelevant Variables  
+6. Model Selection Criteria  
+7. Collinearity  
+
+# 1. Data Loading and Setup
+
+**Objective:**  
+Prepare your workspace by clearing previous objects, loading the necessary packages, and inspecting your cps5 dataset.
+
+**Instructions for Your cps5 Analysis:**  
+1. Load pacman package.  
+2. Load the required packages (e.g., tidyverse, car, broom).  
+3. Load the cps5 dataset and inspect its structure using `glimpse()`.
+
+**Example (using mtcars as a model):**
+
+```{r}
+# Step 1: Load required packages using pacman
+if(!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, car, broom)
+
+# Step 2: Load and inspect the mtcars dataset (for demonstration)
+data(mtcars)
+glimpse(mtcars)
+```
+
+*Note:* In your final work, replace the mtcars dataset with cps5 (e.g., use `data("cps5")` and `glimpse(cps5)`).
+
+# 2. Joint Hypotheses and the F‑Statistic
+
+**Objective:**  
+Test a joint hypothesis using the F‑statistic by comparing an unrestricted model (with all predictors) against the null hypothesis that two coefficients are zero.
+
+**Instructions for Your cps5 Analysis:**  
+1. **Fit the Unrestricted Model:**  
+   Using the cps5 dataset, fit a regression model that predicts wage using all your chosen numeric predictors (for example, age, educ, exper, faminc, hrswork, and nchild).  
+2. **Specify the Joint Hypothesis:**  
+   Define the null hypothesis that two coefficients (for instance, the effects of faminc and nchild) are both equal to zero.  
+3. **Run the Joint Test:**  
+   Use the `linearHypothesis()` function from the car package to test this joint hypothesis.  
+4. **Interpret the Results:**  
+   Examine the F‑statistic and p‑value. A low p‑value indicates that you should reject the null hypothesis, implying that at least one of the two predictors significantly influences wage.
+
+**Example (using mtcars as a model):**
+
+```{r}
+# Step 1: Fit the unrestricted model on mtcars.
+mod_full <- lm(mpg ~ wt + hp + disp, data = mtcars)
+
+# Step 2: Specify the joint hypothesis: test if hp = 0 and disp = 0.
+hypothesis <- c("hp = 0", "disp = 0")
+
+# Step 3: Run the joint hypothesis test using linearHypothesis()
+lh_test <- linearHypothesis(mod_full, hypothesis)
+print(lh_test)
+```
+
+**Explanation:**  
+In this example, the regression model on mtcars predicts mpg using wt, hp, and disp. The joint hypothesis test checks whether both hp and disp have no effect (i.e., their coefficients equal zero). The output includes an F‑statistic and a p‑value. A low p‑value suggests that at least one predictor is significant. For your cps5 analysis, you might test whether faminc and nchild jointly have no effect on wage.
+
+# 3. Testing Simultaneous Hypotheses
+
+**Objective:**  
+Examine whether specific linear combinations of regression coefficients are simultaneously equal to zero.
+
+**Instructions for Your cps5 Analysis:**  
+1. **Define the Simultaneous Hypotheses:**  
+   Formulate hypotheses that reflect relationships you want to test (for example, that the difference between two coefficients is zero).  
+2. **Run the Joint Test:**  
+   Use `linearHypothesis()` to test these simultaneous restrictions on your cps5 model.  
+3. **Interpret the Output:**  
+   Focus on the F‑statistic and p‑value to determine if the combined restrictions hold.
+
+**Example (using mtcars as a model):**
+
+```{r}
+# Step 1: Define the simultaneous hypotheses.
+# Example: test if the difference between wt and hp is zero,
+# and if the difference between disp and hp is zero.
+joint_hyp <- c("wt - hp = 0", "disp - hp = 0")
+
+# Step 2: Test the simultaneous hypotheses on the full mtcars model.
+lh_joint <- linearHypothesis(mod_full, joint_hyp)
+print(lh_joint)
+```
+
+**Explanation:**  
+This example tests whether the difference between the coefficients for wt and hp is zero, as well as whether the difference between disp and hp is zero. The output helps determine whether these specific relationships hold. For your cps5 analysis, adjust the hypotheses based on your theoretical expectations.
+
+# 4. Omitted Variable Bias
+
+**Objective:**  
+Determine the effect on estimated coefficients when a relevant variable is omitted from the model.
+
+**Instructions for Your cps5 Analysis:**  
+1. **Fit the Full Model:**  
+   Regress wage on all your chosen predictors (e.g., age, educ, exper, faminc, hrswork, nchild) using cps5.  
+2. **Fit the Restricted Model:**  
+   Omit one key variable (for example, omit educ) from the model.  
+3. **Compare the Results:**  
+   Compare the regression outputs—especially the estimated coefficient(s) of another predictor—to assess the potential bias.
+
+**Example (using mtcars as a model):**
+
+```{r}
+# Step 1: Fit the full model: mpg ~ wt + hp + disp
+mod_full_bias <- lm(mpg ~ wt + hp + disp, data = mtcars)
+summary(mod_full_bias)
+
+# Step 2: Fit the restricted model: omit hp (i.e., mpg ~ wt + disp)
+mod_omitted <- lm(mpg ~ wt + disp, data = mtcars)
+summary(mod_omitted)
+```
+
+**Explanation:**  
+This example shows two models: a full model that includes wt, hp, and disp, and a restricted model that omits hp. Comparing the estimates for wt between these models reveals how omitting a relevant variable (hp) can bias the effect of another predictor. For cps5, you might omit educ to examine the bias on another variable’s coefficient.
+
+# 5. Irrelevant Variables
+
+**Objective:**  
+Determine how including variables that theoretically should not affect the outcome impacts your regression estimates.
+
+**Instructions for Your cps5 Analysis:**  
+1. **Create Irrelevant Variables:**  
+   Generate one or two artificial variables (using random noise) that are not expected to affect wage.  
+2. **Fit the Base Model:**  
+   Estimate a model using only the relevant predictors on cps5.  
+3. **Fit the Extended Model:**  
+   Estimate an extended model that includes the irrelevant variables.  
+4. **Compare the Outputs:**  
+   Compare the coefficient estimates and standard errors between the two models.
+
+**Example (using mtcars as a model):**
+
+```{r}
+# Step 1: Create two artificial irrelevant variables
+set.seed(123)
+mtcars <- mtcars %>%
+  mutate(irrel1 = rnorm(nrow(mtcars)),
+         irrel2 = rnorm(nrow(mtcars)))
+
+# Step 2: Fit the model without irrelevant variables: mpg ~ wt + hp + disp
+mod_no_irrel <- lm(mpg ~ wt + hp + disp, data = mtcars)
+summary(mod_no_irrel)
+
+# Step 3: Fit the model with irrelevant variables: mpg ~ wt + hp + disp + irrel1 + irrel2
+mod_with_irrel <- lm(mpg ~ wt + hp + disp + irrel1 + irrel2, data = mtcars)
+summary(mod_with_irrel)
+```
+
+**Explanation:**  
+The inclusion of irrelevant variables (irrel1 and irrel2) should not substantially change the coefficients of the main predictors but may inflate their standard errors. Compare the models to determine the effect of including these noise variables. In your cps5 analysis, add variables that theory suggests should not influence wage and discuss the impact.
+
+# 6. Model Selection Criteria
+
+**Objective:**  
+Compare multiple models using criteria that balance model fit and parsimony.
+
+**Instructions for Your cps5 Analysis:**  
+1. **Estimate Several Models:**  
+   Build several regression models on cps5 with different combinations of predictors (for example, start with a simple model and gradually add variables like age, educ, exper, faminc, hrswork, and nchild).  
+2. **Extract Model Statistics:**  
+   Use the `glance()` function from the broom package to retrieve R², adjusted R², AIC, and BIC for each model.  
+3. **Compare the Models:**  
+   Compare these statistics to decide which model provides the best balance of fit and simplicity.
+
+**Example (using mtcars as a model):**
+
+```{r}
+# Step 1: Estimate alternative models
+modA <- lm(mpg ~ wt, data = mtcars)
+modB <- lm(mpg ~ wt + hp, data = mtcars)
+modC <- lm(mpg ~ wt + hp + disp, data = mtcars)
+modD <- lm(mpg ~ wt + hp + disp + drat, data = mtcars)
+
+# Step 2: Extract model statistics using glance()
+statsA <- glance(modA)[, c("r.squared", "adj.r.squared", "AIC", "BIC")]
+statsB <- glance(modB)[, c("r.squared", "adj.r.squared", "AIC", "BIC")]
+statsC <- glance(modC)[, c("r.squared", "adj.r.squared", "AIC", "BIC")]
+statsD <- glance(modD)[, c("r.squared", "adj.r.squared", "AIC", "BIC")]
+
+# Step 3: Print the statistics for comparison
+print(statsA)
+print(statsB)
+print(statsC)
+print(statsD)
+```
+
+**Explanation:**  
+Although R² generally increases with more predictors, adjusted R², AIC, and BIC penalize unnecessary complexity. These measures help you decide which model best predicts mpg without overfitting. For cps5, build models predicting wage with different combinations of variables and select the best based on these criteria.
+
+# 7. Collinearity
+
+**Objective:**  
+Assess collinearity among predictors by calculating Variance Inflation Factors (VIF).
+
+**Instructions for Your cps5 Analysis:**  
+1. **Fit a Multivariate Model:**  
+   Estimate a model using your chosen predictors on cps5.  
+2. **Calculate VIFs:**  
+   Use the `vif()` function from the car package to compute VIF values for each predictor.  
+3. **Interpret the VIF Values:**  
+   Examine the VIF values—typically, a VIF above 10 indicates problematic collinearity.
+
+**Example (using mtcars as a model):**
+
+```{r}
+# Step 1: Fit a multivariate model: mpg ~ wt + hp + disp + drat
+mod_collinearity <- lm(mpg ~ wt + hp + disp + drat, data = mtcars)
+
+# Step 2: Calculate Variance Inflation Factors (VIF)
+vif_values <- vif(mod_collinearity)
+
+# Step 3: Print the VIF values
+print(vif_values)
+```
+
+**Explanation:**  
+VIF values show how much the variance of an estimated coefficient increases due to multicollinearity. High VIFs (commonly > 10) signal that a predictor is highly correlated with others, which can make coefficient estimates less reliable. For your cps5 analysis, calculate and discuss the VIFs for your selected predictors.
+
+# Conclusion
+
+In your final report for the cps5 data project, be sure to include the following:
+
+- **Introduction:**  
+  Describe your research questions, the rationale for using cps5, and your overall analytical approach.
+- **Joint Hypotheses and the F‑Statistic:**  
+  Present your joint hypothesis test results (using your cps5 model) and interpret the F‑statistic and p‑value.
+- **Testing Simultaneous Hypotheses:**  
+  Discuss the results of your simultaneous hypothesis tests and their implications.
+- **Omitted Variable Bias:**  
+  Compare the full and restricted cps5 models and explain any observed bias when omitting a key variable.
+- **Irrelevant Variables:**  
+  Report how the inclusion of irrelevant variables affects your model’s coefficients and precision.
+- **Model Selection Criteria:**  
+  Compare multiple cps5 models using R², adjusted R², AIC, and BIC, and justify your model choice.
+- **Collinearity:**  
+  Evaluate collinearity using VIF values and discuss any concerns.
+- **Conclusion:**  
+  Summarize your key findings and provide recommendations for further model refinement.
+
+# Submission Instructions
+
+- **Nicely Format Your Results:** Use Quarto or RMarkdown to clearly present your code and results.
+- **Render to MS Word:** Once your work is complete, render your file to produce an MS Word (.docx) document.
+- **Submission:** Upload the rendered document to the Canvas Dropbox.
